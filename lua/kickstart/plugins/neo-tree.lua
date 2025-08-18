@@ -19,6 +19,12 @@ return {
       window = {
         mappings = {
           ['\\'] = 'close_window',
+          ['a'] = 'add',
+          ['d'] = 'delete',
+          ['r'] = 'rename',
+          ['c'] = 'copy_to_clipboard',
+          ['x'] = 'cut_to_clipboard',
+          ['p'] = 'paste_from_clipboard',
         },
       },
     },

@@ -3,6 +3,7 @@
 
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
+vim.o.termguicolors = true
 
 -- Buffer management
 vim.keymap.set('n', '<leader>w', ':bdelete<CR>', { desc = 'Close buffer' })
@@ -191,6 +192,88 @@ rtp:prepend(lazypath)
 --NOTE: ___________________________________________________________PLUGINS___________________________________________NOTE:
 
 require('lazy').setup({
+  -- {
+  --   'benlubas/molten-nvim',
+  --   version = '^1.0.0', -- Pin to stable version to avoid breaking changes
+  --   dependencies = { '3rd/image.nvim' },
+  --   build = ':UpdateRemotePlugins', -- Required for remote plugin functionality
+  --   init = function()
+  --     -- Core molten settings for optimal workflow
+  --     vim.g.molten_image_provider = 'image.nvim' -- Use image.nvim for image rendering
+  --     vim.g.molten_output_win_max_height = 20 -- Limit output window height
+  --     vim.g.molten_auto_open_output = false -- Prevent auto-opening output window
+  --     vim.g.molten_wrap_output = true -- Wrap long outputs for readability
+  --     vim.g.molten_virt_text_output = true -- Show output as virtual text
+  --     vim.g.molten_virt_lines_off_by_1 = true -- Place virtual text below code cell
+  --     vim.g.molten_auto_image_popup = false -- Disable auto-opening images in external viewer
+  --     vim.g.molten_auto_init_behavior = 'init' -- Prompt for kernel if none selected
+  --   end,
+  -- },
+  -- {
+  --   '3rd/image.nvim',
+  --   opts = {
+  --     backend = 'kitty', -- Best for image rendering in supported terminals
+  --     integrations = {}, -- Disable default integrations for cleaner setup
+  --     max_width = 100, -- Prevent terminal crashes from large images
+  --     max_height = 12, -- Reasonable height for most outputs
+  --     max_height_window_percentage = math.huge, -- Allow full image height
+  --     max_width_window_percentage = math.huge, -- Allow full image width
+  --     window_overlap_clear_enabled = true, -- Clear overlapping images
+  --     window_overlap_clear_ft_ignore = { 'cmp_menu', 'cmp_docs', '' }, -- Ignore certain filetypes
+  --   },
+  -- },
+  {
+    'bluz71/vim-moonfly-colors',
+    lazy = false,
+    priority = 1000,
+    config = function()
+      vim.cmd.syntax 'enable'
+      vim.cmd.colorscheme 'moonfly'
+
+      vim.api.nvim_set_hl(0, 'MoltenOutputBorder', { link = 'Normal' })
+      vim.api.nvim_set_hl(0, 'MoltenOutputBorderFail', { link = 'MoonflyCrimson' })
+      vim.api.nvim_set_hl(0, 'MoltenOutputBorderSuccess', { link = 'MoonflyBlue' })
+    end,
+  },
+  {
+    'benlubas/molten-nvim',
+    dependencies = { '3rd/image.nvim' },
+    build = ':UpdateRemotePlugins',
+    init = function()
+      vim.g.molten_image_provider = 'image.nvim'
+      vim.g.molten_use_border_highlights = true
+      vim.g.molten_auto_open_output = true
+      -- add a few new things
+
+      -- don't change the mappings (unless it's related to your bug)
+      vim.keymap.set('n', '<localleader>mi', ':MoltenInit<CR>')
+      vim.keymap.set('n', '<localleader>e', ':MoltenEvaluateOperator<CR>')
+      vim.keymap.set('n', '<localleader>rr', ':MoltenReevaluateCell<CR>')
+      vim.keymap.set('v', '<localleader>r', ':<C-u>MoltenEvaluateVisual<CR>gv')
+      vim.keymap.set('n', '<localleader>os', ':noautocmd MoltenEnterOutput<CR>')
+      vim.keymap.set('n', '<localleader>oh', ':MoltenHideOutput<CR>')
+      vim.keymap.set('n', '<localleader>md', ':MoltenDelete<CR>')
+    end,
+  },
+  {
+    '3rd/image.nvim',
+    opts = {
+      backend = 'kitty',
+      integrations = {},
+      max_width = 100,
+      max_height = 12,
+      max_height_window_percentage = math.huge,
+      max_width_window_percentage = math.huge,
+      window_overlap_clear_enabled = true,
+      window_overlap_clear_ft_ignore = { 'cmp_menu', 'cmp_docs', '' },
+    },
+    config = function()
+      -- require('image').setup()
+      -- package.path = package.path .. ';' .. vim.fn.expand '$HOME' .. '/.luarocks/share/lua/5.1/?/init.lua'
+      -- package.path = package.path .. ';' .. vim.fn.expand '$HOME' .. '/.luarocks/share/lua/5.1/?.lua'
+    end,
+    -- version = '1.1.0', -- or comment out for latest
+  },
 
   -- Use `opts = {}` to automatically pass options to a plugin's `setup()` function, forcing the plugin to be loaded.
   --    {
@@ -202,7 +285,7 @@ require('lazy').setup({
   --        end,
   --    }
 
-  'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
+  'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth autkomatically
   { -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
     opts = {
@@ -822,12 +905,12 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'python' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
         enable = true,
-        additional_vim_regex_highlighting = { 'ruby' },
+        additional_vim_regex_highlighting = false,
       },
       indent = { enable = true, disable = { 'ruby' } },
     },
@@ -909,3 +992,47 @@ vim.opt.list = true
 vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+-- -- Transparent background overrides
+vim.api.nvim_create_autocmd('ColorScheme', {
+  callback = function()
+    vim.cmd [[
+      hi Normal guibg=none ctermbg=none
+      hi NormalNC guibg=none ctermbg=none
+      hi SignColumn guibg=none ctermbg=none
+      hi LineNr guibg=none ctermbg=none
+      hi EndOfBuffer guibg=none ctermbg=none
+      hi NeoTreeNormal guibg=none ctermbg=none
+    ]]
+  end,
+})
+vim.cmd [[
+  set termguicolors
+  hi Normal guibg=none ctermbg=none
+  hi NormalNC guibg=none ctermbg=none
+  hi EndOfBuffer guibg=none ctermbg=none
+]]
+-- Optional: Autocommand for Jupyter notebook support
+vim.api.nvim_create_autocmd('BufAdd', {
+  pattern = { '*.ipynb' },
+  callback = function(e)
+    vim.schedule(function()
+      local kernels = vim.fn.MoltenAvailableKernels()
+      local try_kernel_name = function()
+        local metadata = vim.json.decode(io.open(e.file, 'r'):read 'a')['metadata']
+        return metadata.kernelspec.name
+      end
+      local ok, kernel_name = pcall(try_kernel_name)
+      if not ok or not vim.tbl_contains(kernels, kernel_name) then
+        kernel_name = nil
+        local venv = os.getenv 'VIRTUAL_ENV' or os.getenv 'CONDA_PREFIX'
+        if venv ~= nil then
+          kernel_name = string.match(venv, '/.+/(.+)')
+        end
+      end
+      if kernel_name ~= nil and vim.tbl_contains(kernels, kernel_name) then
+        vim.cmd(('MoltenInit %s'):format(kernel_name))
+      end
+      vim.cmd 'MoltenImportOutput'
+    end)
+  end,
+})
