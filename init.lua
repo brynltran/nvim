@@ -343,16 +343,61 @@ require('lazy').setup({
       vim.g.molten_image_provider = 'image.nvim'
       vim.g.molten_use_border_highlights = true
       vim.g.molten_auto_open_output = true
+      -- MOLTEN CONFIG - outputs must stay visible
+      vim.g.molten_auto_open_output = true
+      vim.g.molten_output_win_border = 'rounded'
+      vim.g.molten_output_win_max_height = 20
+      vim.g.molten_wrap_output = true
+      vim.g.molten_virt_text_output = true
+      vim.g.molten_virt_lines_off_by_1 = true
+
+      -- CRITICAL: Auto-open and keep outputs
+      vim.g.molten_auto_open_html_in_browser = false
+      vim.g.molten_use_border_highlights = true
+
+      -- Force output to persist after evaluation
+      vim.api.nvim_create_autocmd('User', {
+        pattern = 'MoltenEvaluateFinished',
+        callback = function()
+          vim.cmd 'MoltenShowOutput'
+        end,
+      })
       -- add a few new things
 
-      -- don't change the mappings (unless it's related to your bug)
-      vim.keymap.set('n', '<localleader>mi', ':MoltenInit<CR>')
-      vim.keymap.set('n', '<localleader>e', ':MoltenEvaluateOperator<CR>')
-      vim.keymap.set('n', '<localleader>rr', ':MoltenReevaluateCell<CR>')
-      vim.keymap.set('v', '<localleader>r', ':<C-u>MoltenEvaluateVisual<CR>gv')
-      vim.keymap.set('n', '<localleader>os', ':noautocmd MoltenEnterOutput<CR>')
-      vim.keymap.set('n', '<localleader>oh', ':MoltenHideOutput<CR>')
-      vim.keymap.set('n', '<localleader>md', ':MoltenDelete<CR>')
+      -- -- don't change the mappings (unless it's related to your bug)
+      -- vim.keymap.set('n', '<localleader>mi', ':MoltenInit<CR>')
+      -- vim.keymap.set('n', '<localleader>e', ':MoltenEvaluateOperator<CR>')
+      -- vim.keymap.set('n', '<localleader>rr', ':MoltenReevaluateCell<CR>')
+      -- vim.keymap.set('v', '<localleader>r', ':<C-u>MoltenEvaluateVisual<CR>gv')
+      -- vim.keymap.set('n', '<localleader>os', ':noautocmd MoltenEnterOutput<CR>')
+      -- vim.keymap.set('n', '<localleader>oh', ':MoltenHideOutput<CR>')
+      -- vim.keymap.set('n', '<localleader>md', ':MoltenDelete<CR>')
+      --
+
+      -- CELL EXECUTION
+      vim.keymap.set('n', '<leader>mi', ':MoltenInit<CR>', { desc = 'Initialize Molten' })
+      vim.keymap.set('n', '<leader>mr', ':MoltenEvaluateOperator<CR>', { desc = 'Run operator selection' })
+      vim.keymap.set('n', '<leader>rr', ':MoltenEvaluateLine<CR>', { desc = 'Evaluate line' })
+      vim.keymap.set('v', '<leader>r', ':<C-u>MoltenEvaluateVisual<CR>gv', { desc = 'Evaluate visual selection' })
+      vim.keymap.set('n', '<leader>rc', ':MoltenReevaluateCell<CR>', { desc = 'Re-evaluate cell' })
+
+      -- RUN ALL VARIATIONS
+      vim.keymap.set('n', '<leader>ra', ':MoltenEvaluateAll<CR>', { desc = 'Evaluate all cells' })
+      vim.keymap.set('n', '<leader>rb', ':MoltenEvaluateArgument<CR>', { desc = 'Evaluate argument/block' })
+
+      -- OUTPUT MANAGEMENT (your key need - keeping output shown)
+      vim.keymap.set('n', '<leader>ro', ':MoltenShowOutput<CR>', { desc = 'Show output' })
+      vim.keymap.set('n', '<leader>rh', ':MoltenHideOutput<CR>', { desc = 'Hide output' })
+      vim.keymap.set('n', '<leader>rt', ':MoltenToggleOutput<CR>', { desc = 'Toggle output visibility' })
+      vim.keymap.set('n', '<leader>rd', ':MoltenDelete<CR>', { desc = 'Delete Molten cell' })
+
+      -- NAVIGATION
+      vim.keymap.set('n', ']c', ':MoltenNext<CR>', { desc = 'Next cell' })
+      vim.keymap.set('n', '[c', ':MoltenPrev<CR>', { desc = 'Previous cell' })
+
+      -- INTERRUPT AND RESTART
+      vim.keymap.set('n', '<leader>rl', ':MoltenInterrupt<CR>', { desc = 'Interrupt execution' })
+      vim.keymap.set('n', '<leader>rk', ':MoltenRestart!<CR>', { desc = 'Restart kernel' })
     end,
   },
   {
