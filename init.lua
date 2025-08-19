@@ -292,36 +292,6 @@ rtp:prepend(lazypath)
 --NOTE: ___________________________________________________________PLUGINS___________________________________________NOTE:
 
 require('lazy').setup({
-  -- {
-  --   'benlubas/molten-nvim',
-  --   version = '^1.0.0', -- Pin to stable version to avoid breaking changes
-  --   dependencies = { '3rd/image.nvim' },
-  --   build = ':UpdateRemotePlugins', -- Required for remote plugin functionality
-  --   init = function()
-  --     -- Core molten settings for optimal workflow
-  --     vim.g.molten_image_provider = 'image.nvim' -- Use image.nvim for image rendering
-  --     vim.g.molten_output_win_max_height = 20 -- Limit output window height
-  --     vim.g.molten_auto_open_output = false -- Prevent auto-opening output window
-  --     vim.g.molten_wrap_output = true -- Wrap long outputs for readability
-  --     vim.g.molten_virt_text_output = true -- Show output as virtual text
-  --     vim.g.molten_virt_lines_off_by_1 = true -- Place virtual text below code cell
-  --     vim.g.molten_auto_image_popup = false -- Disable auto-opening images in external viewer
-  --     vim.g.molten_auto_init_behavior = 'init' -- Prompt for kernel if none selected
-  --   end,
-  -- },
-  -- {
-  --   '3rd/image.nvim',
-  --   opts = {
-  --     backend = 'kitty', -- Best for image rendering in supported terminals
-  --     integrations = {}, -- Disable default integrations for cleaner setup
-  --     max_width = 100, -- Prevent terminal crashes from large images
-  --     max_height = 12, -- Reasonable height for most outputs
-  --     max_height_window_percentage = math.huge, -- Allow full image height
-  --     max_width_window_percentage = math.huge, -- Allow full image width
-  --     window_overlap_clear_enabled = true, -- Clear overlapping images
-  --     window_overlap_clear_ft_ignore = { 'cmp_menu', 'cmp_docs', '' }, -- Ignore certain filetypes
-  --   },
-  -- },
   {
     'bluz71/vim-moonfly-colors',
     lazy = false,
@@ -362,17 +332,6 @@ require('lazy').setup({
           vim.cmd 'MoltenShowOutput'
         end,
       })
-      -- add a few new things
-
-      -- -- don't change the mappings (unless it's related to your bug)
-      -- vim.keymap.set('n', '<localleader>mi', ':MoltenInit<CR>')
-      -- vim.keymap.set('n', '<localleader>e', ':MoltenEvaluateOperator<CR>')
-      -- vim.keymap.set('n', '<localleader>rr', ':MoltenReevaluateCell<CR>')
-      -- vim.keymap.set('v', '<localleader>r', ':<C-u>MoltenEvaluateVisual<CR>gv')
-      -- vim.keymap.set('n', '<localleader>os', ':noautocmd MoltenEnterOutput<CR>')
-      -- vim.keymap.set('n', '<localleader>oh', ':MoltenHideOutput<CR>')
-      -- vim.keymap.set('n', '<localleader>md', ':MoltenDelete<CR>')
-      --
 
       -- CELL EXECUTION
       vim.keymap.set('n', '<leader>mi', ':MoltenInit<CR>', { desc = 'Initialize Molten' })
@@ -1282,3 +1241,70 @@ vim.api.nvim_create_autocmd('BufAdd', {
     end)
   end,
 })
+
+-- AUTO-ATTACH PYTHON LSP WHEN MOLTEN IS ACTIVE
+vim.api.nvim_create_autocmd('User', {
+  pattern = 'MoltenInitialized',
+  callback = function()
+    -- Check if it's a Python kernel
+    local kernel = vim.g.molten_last_kernel or ''
+    if kernel:match 'python' then
+      -- Ensure Python LSP is running
+      vim.cmd 'LspStart pyright' -- or pylsp, ruff_lsp, etc.
+      print '🐍 Python LSP + Molten kernel active!'
+    end
+  end,
+})
+-- ONE-COMMAND FULL SETUP
+vim.keymap.set('n', '<leader>psetup', function()
+  -- Initialize if needed
+  vim.cmd 'MoltenInit python3'
+
+  -- Import basics directly
+  local setup_code = [[import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from pathlib import Path
+import json
+import warnings
+warnings.filterwarnings('ignore')
+%matplotlib inline
+plt.rcParams['figure.figsize'] = (12, 8)
+pd.set_option('display.max_columns', None)
+print("🐍 Python environment ready!")
+print("📂 Current directory:", Path.cwd())
+print("🔍 Use <leader>pf for .py files, <leader>pld for data files")]]
+
+  vim.api.nvim_buf_set_lines(0, -1, -1, false, vim.split(setup_code, '\n'))
+  vim.cmd 'MoltenEvaluateVisual'
+end, { desc = 'Complete Python setup with kernel initialization' })
+
+-- AUTO-ATTACH PYTHON LSP WHEN MOLTEN IS ACTIVE
+vim.api.nvim_create_autocmd('User', {
+  pattern = 'MoltenInitialized',
+  callback = function()
+    -- Check if it's a Python kernel
+    local kernel = vim.g.molten_last_kernel or ''
+    if kernel:match 'python' then
+      -- Ensure Python LSP is running
+      vim.cmd 'LspStart pyright' -- or pylsp, ruff_lsp, etc.
+      print '🐍 Python LSP + Molten kernel active!'
+    end
+  end,
+})
+
+-- In your molten-nvim config, add this keymap:
+vim.keymap.set('v', '<leader>r', function()
+  -- Capture the current visual selection
+  vim.cmd 'MoltenEvaluateVisual'
+  -- Exit visual mode
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', true, false, true), 'n', false)
+end, { desc = 'Evaluate visual selection and exit visual mode' })
+
+vim.keymap.set('v', '<leader>e', function()
+  -- Capture the current visual selection
+  vim.cmd 'MoltenEvaluateVisual'
+  -- Exit visual mode
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', true, false, true), 'n', false)
+end, { desc = 'Evaluate visual selection and exit visual mode' })
