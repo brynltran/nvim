@@ -538,7 +538,118 @@ require('lazy').setup({
     dependencies = {
       -- NOTE: `opts = {}` is the same as calling `require('mason').setup({})`
       { 'mason-org/mason.nvim', opts = {} },
-      'mason-org/mason-lspconfig.nvim',
+      -- 'mason-org/mason-lspconfig.nvim',
+      {
+        -- Main LSP Configuration
+        'neovim/nvim-lspconfig',
+        dependencies = {
+          { 'mason-org/mason.nvim', opts = {} },
+          'mason-org/mason-lspconfig.nvim',
+          'WhoIsSethDaniel/mason-tool-installer.nvim',
+          { 'j-hui/fidget.nvim', opts = {} },
+          'saghen/blink.cmp',
+        },
+        config = function()
+          vim.api.nvim_create_autocmd('LspAttach', {
+            group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
+            callback = function(event)
+              local map = function(keys, func, desc, mode)
+                mode = mode or 'n'
+                vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
+              end
+
+              -- ENHANCED NAVIGATION
+              map('gd', vim.lsp.buf.definition, '[G]oto [D]efinition')
+              map('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
+              map('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
+              map('gt', require('telescope.builtin').lsp_type_definitions, '[G]oto [T]ype Definition')
+              map('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
+
+              -- HOVER AND HELP
+              map('K', vim.lsp.buf.hover, 'Hover Documentation')
+              map('<C-k>', vim.lsp.buf.signature_help, 'Signature Help')
+
+              -- CODE ACTIONS AND REFACTORING
+              map('grn', vim.lsp.buf.rename, '[R]e[n]ame')
+              map('gra', vim.lsp.buf.code_action, '[G]oto Code [A]ction', { 'n', 'x' })
+
+              -- DIAGNOSTICS
+              map('<leader>e', vim.diagnostic.open_float, 'Show diagnostic [E]rror messages')
+              map('<leader>q', vim.diagnostic.setloclist, 'Open diagnostic [Q]uickfix list')
+              map('[d', vim.diagnostic.goto_prev, 'Go to previous [D]iagnostic message')
+              map(']d', vim.diagnostic.goto_next, 'Go to next [D]iagnostic message')
+
+              -- SYMBOLS AND WORKSPACE
+              map('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
+              map('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
+
+              -- WORKSPACE FOLDERS
+              map('<leader>wa', vim.lsp.buf.add_workspace_folder, '[W]orkspace [A]dd Folder')
+              map('<leader>wr', vim.lsp.buf.remove_workspace_folder, '[W]orkspace [R]emove Folder')
+
+              -- INLAY HINTS TOGGLE
+              if vim.lsp.inlay_hint then
+                map('<leader>th', function()
+                  vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
+                end, '[T]oggle Inlay [H]ints')
+              end
+
+              -- AUTO-HIGHLIGHT REFERENCES
+              local client = vim.lsp.get_client_by_id(event.data.client_id)
+              if client and client.server_capabilities.documentHighlightProvider then
+                local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
+                vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
+                  buffer = event.buf,
+                  group = highlight_augroup,
+                  callback = vim.lsp.buf.document_highlight,
+                })
+
+                vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
+                  buffer = event.buf,
+                  group = highlight_augroup,
+                  callback = vim.lsp.buf.clear_references,
+                })
+              end
+            end,
+          })
+
+          -- ENHANCED DIAGNOSTIC CONFIG
+          vim.diagnostic.config {
+            virtual_text = {
+              spacing = 2,
+              source = 'if_many',
+              prefix = '●',
+            },
+            severity_sort = true,
+            float = {
+              source = 'always',
+              border = 'rounded',
+              header = '',
+              prefix = '',
+            },
+            signs = {
+              text = {
+                [vim.diagnostic.severity.ERROR] = '✘',
+                [vim.diagnostic.severity.WARN] = '▲',
+                [vim.diagnostic.severity.HINT] = '⚑',
+                [vim.diagnostic.severity.INFO] = '»',
+              },
+            },
+          }
+
+          -- LSP UI IMPROVEMENTS
+          local border = 'rounded'
+          vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, { border = border })
+          vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = border })
+
+          -- REDUCE HOVER DELAY
+          vim.opt.updatetime = 250
+
+          -- Continue with your existing capabilities and server setup...
+          local capabilities = require('blink.cmp').get_lsp_capabilities()
+          -- ... rest of your config
+        end,
+      },
       'WhoIsSethDaniel/mason-tool-installer.nvim',
 
       -- Useful status updates for LSP.
