@@ -18,6 +18,106 @@ vim.keymap.set('n', '<leader>sh', ':split<CR>', { desc = 'Horizontal split' })
 -- Save and quit
 vim.keymap.set('n', '<leader>s', ':w<CR>', { desc = 'Save file' })
 vim.keymap.set('n', '<leader>q', ':q<CR>', { desc = 'Quit window' })
+
+-- Smooth scrolling settings
+vim.opt.scroll = 15 -- Number of lines to scroll with CTRL-U and CTRL-D
+vim.opt.scrolloff = 8 -- Keep 8 lines visible when scrolling
+vim.opt.sidescrolloff = 8 -- Keep 8 columns visible when side scrolling
+
+-- Make scrolling smoother/faster
+vim.opt.lazyredraw = true -- Don't redraw while executing macros (faster)
+
+-- NOTE: My keymaps
+-- Better paste (don't lose clipboard)
+vim.keymap.set('v', 'p', '"_dP')
+
+-- Navigate visual lines (wrapped lines) instead of actual lines
+vim.keymap.set({ 'n', 'v' }, 'j', 'gj') -- j moves down visual line
+vim.keymap.set({ 'n', 'v' }, 'k', 'gk') -- k moves up visual line
+vim.keymap.set({ 'n', 'v' }, 'gj', 'j') -- gj moves down actual line (swap)
+vim.keymap.set({ 'n', 'v' }, 'gk', 'k') -- gk moves up actual line (swap)
+
+-- Arrow keys for wrapped lines too
+vim.keymap.set({ 'n', 'v' }, '<Down>', 'gj')
+vim.keymap.set({ 'n', 'v' }, '<Up>', 'gk')
+--
+-- Don't jump when yanking in visual mode
+vim.keymap.set('v', 'y', 'ygv<Esc>') -- Yank and stay at selection end
+vim.keymap.set('v', 'Y', 'Ygv<Esc>') -- Same for Y
+
+-- Or stay exactly where cursor was
+vim.keymap.set('v', 'y', 'y`>') -- Yank and go to end of selection
+-- Stay at paste location (don't jump back)
+vim.keymap.set('v', 'p', 'pgv<Esc>') -- Paste and stay at end of pasted text
+vim.keymap.set('v', 'P', 'Pgv<Esc>') -- Same for P
+
+-- vim.opt.scrolloff = 4 -- Vertical buffer (4 lines above/below)
+-- vim.opt.sidescrolloff = 4 -- Horizontal buffer (4 columns left/right)
+-- Auto-center on various movements
+vim.keymap.set('n', 'n', 'nzz') -- Next search result + center
+vim.keymap.set('n', 'N', 'Nzz') -- Previous search result + center
+vim.keymap.set('n', '*', '*zz') -- Search word under cursor + center
+vim.keymap.set('n', '#', '#zz') -- Search word backward + center
+vim.keymap.set('n', 'G', 'Gzz') -- Go to line + center
+vim.keymap.set('n', 'gg', 'ggzz') -- Go to top + center
+-- vim.keymap.set({ 'n', 'v' }, '<S-m>', function()
+--   local line_length = vim.fn.col '$' - 1 -- Get actual line length
+--   local middle_col = math.max(1, math.floor(line_length / 2))
+--   vim.fn.cursor(0, middle_col)
+-- end)
+
+-- Center after jumps
+vim.keymap.set('n', '<C-o>', '<C-o>zz') -- Jump back + center
+vim.keymap.set('n', '<C-i>', '<C-i>zz') -- Jump forward + center
+vim.keymap.set('n', '}', '}zz') -- Next paragraph + center
+vim.keymap.set('n', '{', '{zz') -- Previous paragraph + center
+
+vim.keymap.set({ 'n', 'v' }, 'H', '^') -- Home (start of line)
+vim.keymap.set({ 'n', 'v' }, 'L', '$') -- Last (end of line)
+vim.keymap.set('n', '<S-h>', '5h') -- Fast left
+vim.keymap.set('n', '<S-l>', '5l') -- Fast right
+vim.keymap.set('n', '<S-j>', 'B') -- Shift+J = fast left (alternative)
+vim.keymap.set('n', '<S-k>', 'W') -- Shift+K = fast right (alternative)
+-- vim.keymap.set({ 'n', 'v' }, 'W', '5w') -- Fast word forward
+-- vim.keymap.set({ 'n', 'v' }, 'B', '5b') -- Fast word backward
+
+-- vim.keymap.set('n', '<C-d>', '<C-d>zz', { desc = 'Bet that' })
+-- vim.keymap.set('n', '<C-u>', '<C-u>zz', { desc = 'Bet that' })
+-- vim.keymap.set('n', 'n', 'nzzzv')
+-- vim.keymap.set('n', 'N', 'Nzzzv')
+
+-- Stay in indent mode
+vim.keymap.set('v', '<', '<gv')
+vim.keymap.set('v', '>', '>gv')
+
+-- Undo break points
+vim.keymap.set('i', ',', ',<c-g>u')
+vim.keymap.set('i', '.', '.<c-g>u')
+vim.keymap.set('i', '!', '!<c-g>u')
+vim.keymap.set('i', '?', '?<c-g>u')
+
+-- Better Y behavior (yank to end of line)
+vim.keymap.set('n', 'Y', 'y$')
+
+-- Split management
+vim.keymap.set('n', '<leader>v', ':vsplit<CR>')
+vim.keymap.set('n', '<leader>s', ':split<CR>')
+
+-- Buffer navigation
+vim.keymap.set('n', '<Tab>', ':bnext<CR>')
+vim.keymap.set('n', '<S-Tab>', ':bprevious<CR>')
+vim.keymap.set('n', '<leader>x', ':bdelete<CR>')
+
+-- Make command mode only exit with Ctrl+C
+vim.keymap.set('c', '<Esc>', '<C-f>', { noremap = true })
+-- " Make command mode only exit with Ctrl+C
+vim.keymap.set('c', '<Esc>', '<C-f>', { noremap = true })
+-- Increase command history buffer size
+vim.opt.history = 10000 -- Default is usually 50-200
+
+vim.keymap.set('n', '<leader>f', ':find ')
+
+--
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
 
@@ -274,16 +374,6 @@ require('lazy').setup({
     end,
     -- version = '1.1.0', -- or comment out for latest
   },
-
-  -- Use `opts = {}` to automatically pass options to a plugin's `setup()` function, forcing the plugin to be loaded.
-  --    {
-  --        'lewis6991/gitsigns.nvim',
-  --        config = function()
-  --            require('gitsigns').setup({
-  --                -- Your gitsigns configuration here
-  --            })
-  --        end,
-  --    }
 
   'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth autkomatically
   { -- Adds git related signs to the gutter, as well as utilities for managing changes
