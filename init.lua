@@ -20,7 +20,7 @@ vim.keymap.set('n', '<leader>s', ':w<CR>', { desc = 'Save file' })
 vim.keymap.set('n', '<leader>q', ':q<CR>', { desc = 'Quit window' })
 
 -- Smooth scrolling settings
-vim.opt.scroll = 15 -- Number of lines to scroll with CTRL-U and CTRL-D
+vim.opt.scroll = 10 -- Number of lines to scroll with CTRL-U and CTRL-D
 vim.opt.scrolloff = 8 -- Keep 8 lines visible when scrolling
 vim.opt.sidescrolloff = 8 -- Keep 8 columns visible when side scrolling
 
@@ -76,8 +76,8 @@ vim.keymap.set({ 'n', 'v' }, 'H', '^') -- Home (start of line)
 vim.keymap.set({ 'n', 'v' }, 'L', '$') -- Last (end of line)
 vim.keymap.set('n', '<S-h>', '5h') -- Fast left
 vim.keymap.set('n', '<S-l>', '5l') -- Fast right
-vim.keymap.set('n', '<S-j>', 'B') -- Shift+J = fast left (alternative)
-vim.keymap.set('n', '<S-k>', 'W') -- Shift+K = fast right (alternative)
+-- vim.keymap.set('n', '<S-j>', 'B') -- Shift+J = fast left (alternative)
+-- vim.keymap.set('n', '<S-k>', 'W') -- Shift+K = fast right (alternative)
 -- vim.keymap.set({ 'n', 'v' }, 'W', '5w') -- Fast word forward
 -- vim.keymap.set({ 'n', 'v' }, 'B', '5b') -- Fast word backward
 
@@ -292,19 +292,19 @@ rtp:prepend(lazypath)
 --NOTE: ___________________________________________________________PLUGINS___________________________________________NOTE:
 
 require('lazy').setup({
-  {
-    'bluz71/vim-moonfly-colors',
-    lazy = false,
-    priority = 1000,
-    config = function()
-      vim.cmd.syntax 'enable'
-      vim.cmd.colorscheme 'moonfly'
-
-      vim.api.nvim_set_hl(0, 'MoltenOutputBorder', { link = 'Normal' })
-      vim.api.nvim_set_hl(0, 'MoltenOutputBorderFail', { link = 'MoonflyCrimson' })
-      vim.api.nvim_set_hl(0, 'MoltenOutputBorderSuccess', { link = 'MoonflyBlue' })
-    end,
-  },
+  --   {
+  --     'bluz71/vim-moonfly-colors',
+  --     lazy = false,
+  --     priority = 1000,
+  --     config = function()
+  --       vim.cmd.syntax 'enable'
+  --       vim.cmd.colorscheme 'moonfly'
+  --
+  --       vim.api.nvim_set_hl(0, 'MoltenOutputBorder', { link = 'Normal' })
+  --       vim.api.nvim_set_hl(0, 'MoltenOutputBorderFail', { link = 'MoonflyCrimson' })
+  --       vim.api.nvim_set_hl(0, 'MoltenOutputBorderSuccess', { link = 'MoonflyBlue' })
+  --     end,
+  --   },
   {
     'benlubas/molten-nvim',
     dependencies = { '3rd/image.nvim' },
@@ -1031,7 +1031,7 @@ require('lazy').setup({
       },
 
       sources = {
-        default = { 'lsp', 'path', 'snippets', 'lazydev' },
+        default = { 'lsp', 'path', 'snippets', 'lazydev', 'buffer' },
         providers = {
           lazydev = { module = 'lazydev.integrations.blink', score_offset = 100 },
         },
@@ -1048,20 +1048,20 @@ require('lazy').setup({
   },
 
   --NOTE: ___________________________________________________________COLORSCHEME_______________________________________NOTE:
-  { -- You can easily change to a different colorscheme.
-    'folke/tokyonight.nvim',
-    priority = 1000, -- Make sure to load this before all the other start plugins.
-    config = function()
-      ---@diagnostic disable-next-line: missing-fields
-      require('tokyonight').setup {
-        styles = {
-          comments = { italic = false }, -- Disable italics in comments
-        },
-      }
-      -- vim.cmd.colorscheme 'tokyonight-night'
-    end,
-  },
-
+  -- { -- You can easily change to a different colorscheme.
+  --   'folke/tokyonight.nvim',
+  --   priority = 1000, -- Make sure to load this before all the other start plugins.
+  --   config = function()
+  --     ---@diagnostic disable-next-line: missing-fields
+  --     require('tokyonight').setup {
+  --       styles = {
+  --         comments = { italic = false }, -- Disable italics in comments
+  --       },
+  --     }
+  --     -- vim.cmd.colorscheme 'tokyonight-night'
+  --   end,
+  -- },
+  --
   --NOTE: ----------------TODO
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
@@ -1103,6 +1103,8 @@ require('lazy').setup({
       --  Check out: https://github.com/echasnovski/mini.nvim
     end,
   },
+
+  -- in your { import = 'custom.plugins' } module or here:
   --NOTE: ___________________________________________________________TREESITTER________________________________________NOTE:
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
